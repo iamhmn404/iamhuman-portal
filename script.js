@@ -3,8 +3,29 @@ document.addEventListener("DOMContentLoaded", () => {
   const pre = document.getElementById("transmission");
   if (!pre) return;
 
-  const fullText = pre.textContent;
-  pre.textContent = "";
+  // Markup with span for purple "not_found"
+  const fullText = `
+Δ-I AM // HUMAN
+
+TRANSMISSION // UNSTABLE
+Portal initializing...
+
+/ NO FACE
+/ NO NAME
+/ JUST THE WORK
+
+∆ = proof_of_presence
+// iamhuman404:<span class="purple">not_found</span>
+
+=[+] HUM // NOISE → SIGNAL
+Searching static...
+Estimated contact: March 2026
+
+> lookup // not yet accessible
+> awaiting next transmission
+  `.trim();
+
+  pre.innerHTML = ""; // start blank
 
   const cursor = document.createElement("span");
   cursor.className = "typing-cursor";
@@ -23,54 +44,63 @@ document.addEventListener("DOMContentLoaded", () => {
     if (/\s/.test(ch)) return 30;
     return rand(18, 58);
   }
-  function type(){
+
+  function type() {
     if (i >= fullText.length) return;
+
+    // detect the sequence "404:" and pause
+    const slice = fullText.slice(i, i + 4);
+    if (slice === "404:") {
+      cursor.before(document.createTextNode("404:"));
+      i += 4;
+      setTimeout(type, 2000); // pause 2s
+      return;
+    }
+
+    // handle span markup for "not_found"
+    if (fullText.startsWith('<span', i)) {
+      const end = fullText.indexOf('</span>', i) + 7;
+      const spanHTML = fullText.slice(i, end);
+      cursor.insertAdjacentHTML("beforebegin", spanHTML);
+      i = end;
+      setTimeout(type, 60);
+      return;
+    }
+
     const ch = fullText.charAt(i++);
     cursor.before(document.createTextNode(ch));
     setTimeout(type, delay(ch));
   }
-  if (reduce){ pre.textContent = fullText; pre.appendChild(cursor); }
-  else { type(); }
+
+  if (reduce) {
+    pre.innerHTML = fullText;
+    pre.appendChild(cursor);
+  } else {
+    type();
+  }
 });
 
-// ===== TRUE TV STATIC (canvas) =====
+// ===== TV STATIC (your existing version preserved) =====
 (() => {
   const canvas = document.getElementById('snow');
   if (!canvas) return;
 
   const ctx = canvas.getContext('2d', { willReadFrequently: true });
-  let cssW, cssH, pxW, pxH, imageData, buf;
+  let w, h, imageData, buf;
 
   function resize() {
-    // CSS size (visual)
-    cssW = window.innerWidth;
-    cssH = window.innerHeight;
-
-    // Device pixel ratio for crispness
-    const dpr = Math.max(1, window.devicePixelRatio || 1);
-
-    // Set CSS size (what you see)
-    canvas.style.width  = cssW + 'px';
-    canvas.style.height = cssH + 'px';
-
-    // Set internal pixel buffer size (what we draw into)
-    pxW = Math.floor(cssW * dpr);
-    pxH = Math.floor(cssH * dpr);
-    canvas.width  = pxW;
-    canvas.height = pxH;
-
-    // IMPORTANT: putImageData ignores transforms, so keep identity.
-    ctx.setTransform(1, 0, 0, 1, 0, 0);
-
-    imageData = ctx.createImageData(pxW, pxH);
+    w = window.innerWidth;
+    h = window.innerHeight;
+    canvas.width  = w;
+    canvas.height = h;
+    imageData = ctx.createImageData(w, h);
     buf = new Uint32Array(imageData.data.buffer);
   }
 
   function drawFrame() {
-    // Random black/white pixels with alpha ~223 (0xDF)
     const len = buf.length;
     for (let i = 0; i < len; i++) {
-      buf[i] = (Math.random() < 0.5) ? 0xDFFFFFFF : 0xDF000000; // 0xAARRGGBB
+      buf[i] = (Math.random() < 0.5) ? 0xDFFFFFFF : 0xDF000000;
     }
     ctx.putImageData(imageData, 0, 0);
     requestAnimationFrame(drawFrame);
@@ -82,9 +112,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const reduce = window.matchMedia &&
     window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   if (reduce) {
-    // One static frame
-    const len = buf.length;
-    for (let i = 0; i < len; i++) {
+    for (let i = 0; i < buf.length; i++) {
       buf[i] = (Math.random() < 0.5) ? 0xDFFFFFFF : 0xDF000000;
     }
     ctx.putImageData(imageData, 0, 0);
