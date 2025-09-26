@@ -11,7 +11,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const fullText = `
 Δ-I AM // HUMAN
 
-TRANSMISSION // UNSTABLE
+TRANSMISSION // <span class="error">UNSTABLE</span>
 Portal initializing...
 
 / NO FACE
@@ -19,15 +19,15 @@ Portal initializing...
 / JUST THE WORK
 
 ∆ = proof_of_presence
-// iamhuman404:<span class="purple">not_found</span>
+// iamhuman404:<span class="white">not_found</span>
 
 =[+] HUM // NOISE → SIGNAL
 Searching static...
-Estimated contact: March 2026
+Estimated contact: <span class="highlight">March 2026</span>
 
-> lookup // not yet accessible
-> awaiting next transmission
-  `.trim();
+> <span class="system">lookup</span> // not yet accessible
+> <span class="system">awaiting next transmission</span>
+`.trim();
 
   pre.innerHTML = ""; // start blank
 
