@@ -46,7 +46,7 @@ Estimated contact: March 2026
     if (ch === "\n") return 260;
     if (/[.,:;)]/.test(ch)) return 80;
     if (/\s/.test(ch)) return 30;
-    return rand(18, 58);
+    return rand(12, 38);
   }
 
   function type() {
