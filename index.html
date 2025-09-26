@@ -9,25 +9,17 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
 
-  <!-- Stylesheet (cache-busted so you see changes) -->
-  <link rel="stylesheet" href="style.css?v=7">
-
+  <!-- Stylesheet (cache-busted) -->
+  <link rel="stylesheet" href="style.css?v=12" />
   <meta name="color-scheme" content="dark">
-
-  <!-- Inline keyframes used by overlay (ensures animation works even if CSS was cached) -->
-  <style>
-    @keyframes scan { from { background-position-y: 0, 0; } to { background-position-y: 6px, 0; } }
-    @keyframes grain { 50% { transform: translate3d(-1.5%, 1.5%, 0); } 100% { transform: translate3d(0,0,0); } }
-    @keyframes softIn { from { transform: translateY(6px); filter: blur(2px); opacity: 0; } to { transform: translateY(0); filter: blur(0); opacity: 1; } }
-    @keyframes cursorBlink { 50% { opacity: 0.15; } }
-  </style>
 </head>
 <body>
-  <!-- Static overlay -->
-  <div class="static-overlay"></div>
+  <!-- TRUE TV STATIC -->
+  <canvas id="snow" aria-hidden="true"></canvas>
+  <div class="scanlines" aria-hidden="true"></div>
 
   <!-- Terminal -->
-  <main class="terminal" aria-label="Transmission text" style="position:relative; z-index:3">
+  <main class="terminal" aria-label="Transmission text">
     <pre id="transmission">
 Δ-I AM // HUMAN
 
@@ -50,7 +42,6 @@ Estimated contact: March 2026
     </pre>
   </main>
 
-  <!-- Script -->
   <script src="script.js" defer></script>
 </body>
 </html>
