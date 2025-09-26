@@ -39,33 +39,38 @@ document.addEventListener("DOMContentLoaded", () => {
   if (!canvas) return;
 
   const ctx = canvas.getContext('2d', { willReadFrequently: true });
-  let w, h, imageData, buf;
+  let cssW, cssH, pxW, pxH, imageData, buf;
 
   function resize() {
     // CSS size (visual)
-    const cssW = window.innerWidth;
-    const cssH = window.innerHeight;
-    canvas.style.width  = cssW + "px";
-    canvas.style.height = cssH + "px";
+    cssW = window.innerWidth;
+    cssH = window.innerHeight;
 
-    // Device pixels for crispness
+    // Device pixel ratio for crispness
     const dpr = Math.max(1, window.devicePixelRatio || 1);
-    canvas.width  = Math.floor(cssW * dpr);
-    canvas.height = Math.floor(cssH * dpr);
 
-    // Reset transform so 1 canvas unit = 1 CSS pixel
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    // Set CSS size (what you see)
+    canvas.style.width  = cssW + 'px';
+    canvas.style.height = cssH + 'px';
 
-    w = cssW; h = cssH;
-    imageData = ctx.createImageData(w, h);
+    // Set internal pixel buffer size (what we draw into)
+    pxW = Math.floor(cssW * dpr);
+    pxH = Math.floor(cssH * dpr);
+    canvas.width  = pxW;
+    canvas.height = pxH;
+
+    // IMPORTANT: putImageData ignores transforms, so keep identity.
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+
+    imageData = ctx.createImageData(pxW, pxH);
     buf = new Uint32Array(imageData.data.buffer);
   }
 
   function drawFrame() {
+    // Random black/white pixels with alpha ~223 (0xDF)
     const len = buf.length;
     for (let i = 0; i < len; i++) {
-      // random pixel: white-ish or black-ish with alpha ~225 (DF)
-      buf[i] = (Math.random() < 0.5) ? 0xDFFFFFFF : 0xDF000000;
+      buf[i] = (Math.random() < 0.5) ? 0xDFFFFFFF : 0xDF000000; // 0xAARRGGBB
     }
     ctx.putImageData(imageData, 0, 0);
     requestAnimationFrame(drawFrame);
@@ -77,7 +82,9 @@ document.addEventListener("DOMContentLoaded", () => {
   const reduce = window.matchMedia &&
     window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   if (reduce) {
-    for (let i = 0; i < buf.length; i++) {
+    // One static frame
+    const len = buf.length;
+    for (let i = 0; i < len; i++) {
       buf[i] = (Math.random() < 0.5) ? 0xDFFFFFFF : 0xDF000000;
     }
     ctx.putImageData(imageData, 0, 0);
