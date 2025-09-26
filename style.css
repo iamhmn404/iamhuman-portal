@@ -21,45 +21,56 @@ body {
 }
 
 /* =========================
-   STATIC OVERLAY — high-visibility, no blend modes
+   STATIC OVERLAY (stronger opacity)
    ========================= */
-.static-overlay{
+.static-overlay {
   position: fixed;
   inset: 0;
-  z-index: 2;                /* below terminal text, above page bg */
+  z-index: 2; /* below terminal text, above page bg */
   pointer-events: none;
 
-  /* Visible scanlines + grain combined */
   background:
-    /* scanlines (clear) */
+    /* scanlines (stronger alpha) */
     repeating-linear-gradient(
       to bottom,
-      rgba(255,255,255,.22) 0 2px,
-      rgba(0,0,0,0)         2px 6px
+      rgba(255,255,255,.35) 0 2px,
+      transparent 2px 6px
     ),
-    /* fine grain pattern */
+    /* fine grain (stronger alpha) */
     repeating-conic-gradient(
       from 0deg,
-      rgba(255,255,255,.10) 0% 2%,
-      rgba(0,0,0,0)         2% 4%
+      rgba(255,255,255,.25) 0% 2%,
+      transparent 2% 4%
     );
 
-  opacity: .22;              /* overall strength */
+  opacity: 0.5; /* overall strength (was 0.22) */
   animation: scan .8s linear infinite, grain 1.6s steps(3) infinite;
   will-change: background-position, transform;
+}
+
+@keyframes scan {
+  from { background-position-y: 0, 0; }
+  to   { background-position-y: 6px, 0; }
+}
+
+@keyframes grain {
+  50% { transform: translate3d(-1.5%, 1.5%, 0); }
+  100%{ transform: translate3d(0,0,0); }
 }
 
 /* =========================
    TERMINAL BLOCK
    ========================= */
 .terminal {
+  position: relative;
+  z-index: 3; /* above static overlay */
   white-space: pre-wrap;
   font-size: clamp(14px, 2.6vw, 20px);
   line-height: 1.5;
   max-width: 90ch;
   padding: 1rem;
 
-  /* Let overlay show through slightly */
+  /* lighter background so static shows through */
   background: rgba(0,0,0,.18);
   border: 1px solid rgba(255,255,255,.10);
   border-radius: 6px;
@@ -70,7 +81,14 @@ body {
   animation: softIn .5s ease-out both;
 }
 
-/* Cursor for typewriter */
+@keyframes softIn {
+  from { transform: translateY(6px); filter: blur(2px); opacity: 0; }
+  to   { transform: translateY(0);   filter: blur(0);    opacity: 1; }
+}
+
+/* =========================
+   CURSOR
+   ========================= */
 .typing-cursor {
   display: inline-block;
   width: 0.6ch;
@@ -81,7 +99,13 @@ body {
   transform: translateY(0.15em);
 }
 
-/* Accessibility */
+@keyframes cursorBlink {
+  50% { opacity: 0.15; }
+}
+
+/* =========================
+   ACCESSIBILITY
+   ========================= */
 @media (prefers-reduced-motion: reduce) {
   .static-overlay { animation: none !important; }
   .terminal { animation: none !important; }
