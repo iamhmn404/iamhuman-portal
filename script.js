@@ -7,7 +7,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const pre = document.getElementById("transmission");
   if (!pre) return;
 
-  // Themed content with glitch span on "not_found"
   const fullText = `
 Δ-I AM // HUMAN
 
@@ -29,7 +28,7 @@ Estimated contact: <span class="highlight">March 2026</span>
 > <span class="system">awaiting next transmission</span>
   `.trim();
 
-  pre.innerHTML = ""; // start clean
+  pre.innerHTML = "";
 
   const cursor = document.createElement("span");
   cursor.className = "typing-cursor";
@@ -59,11 +58,11 @@ Estimated contact: <span class="highlight">March 2026</span>
     if (slice === "404:") {
       cursor.before(document.createTextNode("404:"));
       i += 4;
-      setTimeout(type, 2000); // 2s pause
+      setTimeout(type, 2000);
       return;
     }
 
-    // Handle spans (<span class="..."> ... </span>)
+    // Handle spans
     if (fullText.startsWith("<span", i)) {
       const tagEnd = fullText.indexOf(">", i) + 1;
       const openTag = fullText.slice(i, tagEnd);
@@ -74,13 +73,40 @@ Estimated contact: <span class="highlight">March 2026</span>
       const closeIdx = fullText.indexOf(closing, tagEnd);
       const innerText = fullText.slice(tagEnd, closeIdx);
 
-      // Create the span
+      // Special case: glitch span
+      if (classMatch && classMatch[1] === "glitch") {
+        let j = 0;
+        function typeGlitch() {
+          if (j < innerText.length) {
+            const ch = innerText.charAt(j++);
+            cursor.before(document.createTextNode(ch));
+            setTimeout(typeGlitch, delay(ch));
+          } else {
+            // Replace raw typed text with glitch span
+            const glitchSpan = document.createElement("span");
+            glitchSpan.className = "glitch";
+            glitchSpan.setAttribute("data-text", innerText);
+            glitchSpan.textContent = innerText;
+
+            // Remove the plain typed text we just added
+            for (let k = 0; k < innerText.length; k++) {
+              pre.removeChild(pre.childNodes[pre.childNodes.length - 2]); 
+            }
+            cursor.before(glitchSpan);
+
+            i = closeIdx + closing.length;
+            setTimeout(type, 50);
+          }
+        }
+        typeGlitch();
+        return;
+      }
+
+      // Normal span
       const spanEl = document.createElement("span");
       if (classMatch) spanEl.className = classMatch[1];
-      if (dataTextMatch) spanEl.setAttribute("data-text", dataTextMatch[1]);
       cursor.before(spanEl);
 
-      // Type inside span
       let j = 0;
       (function typeSpan() {
         if (j < innerText.length) {
@@ -88,14 +114,14 @@ Estimated contact: <span class="highlight">March 2026</span>
           spanEl.append(ch);
           setTimeout(typeSpan, delay(ch));
         } else {
-          i = closeIdx + closing.length; // move past </span>
+          i = closeIdx + closing.length;
           setTimeout(type, 50);
         }
       })();
       return;
     }
 
-    // Normal char
+    // Normal characters
     const ch = fullText.charAt(i++);
     cursor.before(document.createTextNode(ch));
     setTimeout(type, delay(ch));
