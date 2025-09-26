@@ -1,5 +1,5 @@
 // ===== CONFIG =====
-const STATIC_BRIGHTNESS = 0.6; // 0 = black, 1 = pure white (try 0.5–0.7)
+const STATIC_BRIGHTNESS = 0.5; // 0 = black, 1 = pure white (try 0.5–0.7)
 
 // ===== TYPEWRITER =====
 document.addEventListener("DOMContentLoaded", () => {
