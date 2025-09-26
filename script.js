@@ -43,10 +43,10 @@ Estimated contact: March 2026
 
   function rand(a,b){ return Math.floor(Math.random()*(b-a+1))+a; }
   function delay(ch){
-    if (ch === "\n") return 260;
+    if (ch === "\n") return 250;
     if (/[.,:;)]/.test(ch)) return 80;
     if (/\s/.test(ch)) return 30;
-    return rand(12, 38);
+    return rand(10, 32);
   }
 
   function type() {
