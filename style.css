@@ -75,3 +75,7 @@ body{
   .scanlines{ animation:none !important; }
   .terminal{ animation:none !important; }
 }
+.purple {
+  color: #6A0DAD; /* royal purple */
+  font-weight: bold;
+}
