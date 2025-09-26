@@ -1,102 +1,50 @@
 :root{
   --bg:#0b0d10;
   --fg:#e9e9ea;
-  --static-strength: .28;   /* overall strength of the static */
-  --scan-strength: .14;     /* scanline visibility */
+  --scan-strength:.12;  /* scanline visibility */
 }
 
 html,body{
-  height:100%;
-  margin:0;
-  background:var(--bg);
-  color:var(--fg);
+  height:100%; margin:0;
+  background:var(--bg); color:var(--fg);
   font-family:"Share Tech Mono","Courier New",monospace;
 }
 
-/* center layout */
+/* Layout */
 body{
   display:flex; align-items:center; justify-content:center;
   padding: env(safe-area-inset-top) env(safe-area-inset-right)
            env(safe-area-inset-bottom) env(safe-area-inset-left);
+  overflow:hidden; /* keeps canvas edges hidden on mobile */
 }
 
-/* =========================================
-   STATIC OVERLAY (TV snow, no conic rays)
-   ========================================= */
-.static-overlay{
+/* Canvas fills screen behind content */
+#snow{
+  position:fixed; inset:0; z-index:1; pointer-events:none;
+  display:block; width:100%; height:100%;
+}
+
+/* Subtle horizontal scanlines layer */
+.scanlines{
   position:fixed; inset:0; z-index:2; pointer-events:none;
-}
-
-/* grain / snow speckles (multiple tiny dot fields that jitter) */
-.static-overlay{
-  background-image:
-    radial-gradient(1px 1px at 7%   17%, rgba(255,255,255,.22) 0 1px, transparent 1px),
-    radial-gradient(1px 1px at 27%  83%, rgba(255,255,255,.18) 0 1px, transparent 1px),
-    radial-gradient(1px 1px at 63%  41%, rgba(255,255,255,.20) 0 1px, transparent 1px),
-    radial-gradient(1px 1px at 91%  62%, rgba(255,255,255,.16) 0 1px, transparent 1px),
-    radial-gradient(1px 1px at 42%  12%, rgba(255,255,255,.18) 0 1px, transparent 1px),
-    radial-gradient(1px 1px at 12%  56%, rgba(255,255,255,.20) 0 1px, transparent 1px);
-  background-size: 180px 180px, 200px 200px, 230px 230px, 260px 260px, 210px 210px, 190px 190px;
-  opacity: var(--static-strength);
-  filter: contrast(110%) brightness(108%);
-  animation: noiseShift .9s steps(2) infinite, jitter .7s steps(2) infinite;
-  will-change: background-position, transform;
-}
-
-@keyframes noiseShift{
-  0%   { background-position: 0 0,  20px -10px, -15px 25px, 40px -30px, -22px 10px, 10px -18px; }
-  100% { background-position: 20px -10px, 0 0,  40px -30px, -15px 25px, 10px -18px, -22px 10px; }
-}
-@keyframes jitter{
-  0%   { transform: translate3d(0,0,0); }
-  100% { transform: translate3d(-1px,1px,0); }
-}
-
-/* thin horizontal scanlines */
-.static-overlay::before{
-  content:"";
-  position:absolute; inset:0; pointer-events:none;
   background: repeating-linear-gradient(
     to bottom,
-    rgba(255,255,255,.22) 0 1px,
+    rgba(255,255,255,.20) 0 1px,
     transparent 1px 3px
   );
   opacity: var(--scan-strength);
   animation: scan .8s linear infinite;
 }
-@keyframes scan{
-  from{ background-position-y: 0; }
-  to  { background-position-y: 4px; }
-}
+@keyframes scan{ from{background-position-y:0} to{background-position-y:4px} }
 
-/* slow vertical roll bar (old CRT vibe) */
-.static-overlay::after{
-  content:"";
-  position:absolute; inset:0; pointer-events:none;
-  background: linear-gradient(to bottom,
-    rgba(255,255,255,.0) 0%,
-    rgba(255,255,255,.08) 45%,
-    rgba(255,255,255,.0) 90%
-  );
-  mix-blend-mode: screen;
-  opacity:.08;
-  animation: roll 6s linear infinite;
-}
-@keyframes roll{
-  from{ transform: translateY(-100%); }
-  to  { transform: translateY(100%); }
-}
-
-/* =========================================
-   TERMINAL BLOCK (no flicker)
-   ========================================= */
+/* Terminal block above everything */
 .terminal{
-  position:relative; z-index:3;              /* above overlay */
+  position:relative; z-index:3;
   white-space:pre-wrap;
   font-size:clamp(14px,2.6vw,20px);
   line-height:1.5;
   max-width:90ch; padding:1rem;
-  background: rgba(0,0,0,.22);               /* lets static show through slightly */
+  background: rgba(0,0,0,.22);
   border:1px solid rgba(255,255,255,.10);
   border-radius:6px;
   box-shadow:0 0 0 1px rgba(255,255,255,.03) inset, 0 10px 30px rgba(0,0,0,.35);
@@ -107,7 +55,7 @@ body{
   to  { transform:translateY(0);   filter:blur(0);    opacity:1; }
 }
 
-/* cursor for the typewriter */
+/* Cursor for typewriter */
 .typing-cursor{
   display:inline-block; width:.6ch; margin-left:.1ch;
   background: currentColor; opacity:.9;
@@ -116,8 +64,7 @@ body{
 }
 @keyframes cursorBlink{ 50%{ opacity:.15 } }
 
-/* accessibility */
+/* Reduced motion: stop animation but keep static frame */
 @media (prefers-reduced-motion: reduce){
-  .static-overlay, .static-overlay::before, .static-overlay::after{ animation:none !important; }
-  .terminal{ animation:none !important; }
+  .scanlines{ animation:none !important; }
 }
