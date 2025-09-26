@@ -16,8 +16,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function randomDelay(ch) {
     if (ch === "\n") return 260;             // pause longer at line breaks
-    if (/[.,:;)]/.test(ch)) return 80;       // pause slightly on punctuation
-    if (/\s/.test(ch)) return 30;            // shorter pause on spaces
+    if (/[.,:;)]/.test(ch)) return 80;       // brief pause on punctuation
+    if (/\s/.test(ch)) return 30;            // short pause on spaces
     return 18 + Math.random() * 40;          // default randomised delay
   }
 
