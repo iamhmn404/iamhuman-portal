@@ -12,71 +12,75 @@ html, body {
 }
 
 /* Center layout */
-body { 
+body {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: env(safe-area-inset-top) env(safe-area-inset-right) 
+  padding: env(safe-area-inset-top) env(safe-area-inset-right)
            env(safe-area-inset-bottom) env(safe-area-inset-left);
 }
 
-/* ===== STATIC OVERLAY ===== */
-.static-overlay {
+/* =========================
+   STATIC OVERLAY — NO BLEND MODES, HIGH CONTRAST
+   ========================= */
+.static-overlay{
   position: fixed;
   inset: 0;
-  z-index: 2; /* sits below terminal but above background */
+  z-index: 2;                /* below terminal text, above page bg */
   pointer-events: none;
+  /* Visible scanlines + grain combined (no mix-blend-mode) */
   background:
-    /* scanlines */
+    /* scanlines (clearly visible) */
     repeating-linear-gradient(
       to bottom,
-      rgba(255,255,255,.12) 0 2px,
-      transparent 2px 6px
+      rgba(255,255,255,.22) 0 2px,
+      rgba(0,0,0,0)         2px 6px
     ),
-    /* fine grain */
+    /* fine grain pattern */
     repeating-conic-gradient(
       from 0deg,
-      rgba(255,255,255,.06) 0% 2%,
-      transparent 2% 4%
+      rgba(255,255,255,.10) 0% 2%,
+      rgba(0,0,0,0)         2% 4%
     );
-  mix-blend-mode: overlay;
-  opacity: 0.20;
+  opacity: .22;              /* overall strength */
   animation: scan .8s linear infinite, grain 1.6s steps(3) infinite;
+  will-change: background-position, transform;
 }
 
 @keyframes scan {
   from { background-position-y: 0, 0; }
   to   { background-position-y: 6px, 0; }
 }
-
 @keyframes grain {
   50% { transform: translate3d(-1.5%, 1.5%, 0); }
-  100% { transform: translate3d(0,0,0); }
+  100%{ transform: translate3d(0,0,0); }
 }
 
-/* ===== TERMINAL BLOCK ===== */
+/* =========================
+   TERMINAL BLOCK (SEE-THROUGH BG)
+   ========================= */
 .terminal {
   position: relative;
-  z-index: 3; /* above static overlay */
+  z-index: 3; /* above overlay */
   white-space: pre-wrap;
   font-size: clamp(14px, 2.6vw, 20px);
   line-height: 1.5;
   max-width: 90ch;
   padding: 1rem;
-  background: rgba(0,0,0,.32);
-  border: 1px solid rgba(255,255,255,.08);
+  background: rgba(0,0,0,.18);     /* lighter so overlay shows through */
+  border: 1px solid rgba(255,255,255,.10);
   border-radius: 6px;
-  box-shadow: 0 0 0 1px rgba(255,255,255,.02) inset,
-              0 10px 30px rgba(0,0,0,.35);
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,.03) inset,
+    0 10px 30px rgba(0,0,0,.35);
   animation: softIn .5s ease-out both;
 }
-
 @keyframes softIn {
   from { transform: translateY(6px); filter: blur(2px); opacity: 0; }
   to   { transform: translateY(0);   filter: blur(0);    opacity: 1; }
 }
 
-/* ===== CURSOR ===== */
+/* Cursor for typewriter */
 .typing-cursor {
   display: inline-block;
   width: 0.6ch;
@@ -86,12 +90,9 @@ body {
   animation: cursorBlink 1.1s steps(2, jump-none) infinite;
   transform: translateY(0.15em);
 }
+@keyframes cursorBlink { 50% { opacity: 0.15; } }
 
-@keyframes cursorBlink {
-  50% { opacity: 0.15; }
-}
-
-/* ===== ACCESSIBILITY ===== */
+/* Accessibility */
 @media (prefers-reduced-motion: reduce) {
   .static-overlay { animation: none !important; }
   .terminal { animation: none !important; }
