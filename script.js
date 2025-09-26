@@ -48,40 +48,52 @@ Estimated contact: March 2026
     return rand(18, 58);
   }
 
-  function type() {
-    if (i >= fullText.length) return;
+ function type() {
+  if (i >= fullText.length) return;
 
-    // detect the sequence "404:" and pause
-    const slice = fullText.slice(i, i + 4);
-    if (slice === "404:") {
-      cursor.before(document.createTextNode("404:"));
-      i += 4;
-      setTimeout(type, 2000); // pause 2s
-      return;
-    }
-
-    // handle span markup for "not_found"
-    if (fullText.startsWith('<span', i)) {
-      const end = fullText.indexOf('</span>', i) + 7;
-      const spanHTML = fullText.slice(i, end);
-      cursor.insertAdjacentHTML("beforebegin", spanHTML);
-      i = end;
-      setTimeout(type, 60);
-      return;
-    }
-
-    const ch = fullText.charAt(i++);
-    cursor.before(document.createTextNode(ch));
-    setTimeout(type, delay(ch));
+  // detect "404:" → pause
+  const slice = fullText.slice(i, i + 4);
+  if (slice === "404:") {
+    cursor.before(document.createTextNode("404:"));
+    i += 4;
+    setTimeout(type, 2000); // pause 2s
+    return;
   }
 
-  if (reduce) {
-    pre.innerHTML = fullText;
-    pre.appendChild(cursor);
-  } else {
-    type();
+  // detect <span ...> markup
+  if (fullText.startsWith('<span', i)) {
+    const tagEnd = fullText.indexOf('>', i) + 1;
+    const spanTag = fullText.slice(i, tagEnd); // e.g. <span class="purple">
+    const closing = '</span>';
+    const closeIdx = fullText.indexOf(closing, tagEnd);
+    const innerText = fullText.slice(tagEnd, closeIdx);
+
+    // create the span
+    const spanEl = document.createElement("span");
+    spanEl.setAttribute("class", "purple");
+    cursor.before(spanEl);
+
+    // type the innerText into span
+    let j = 0;
+    function typeSpan() {
+      if (j < innerText.length) {
+        spanEl.append(innerText.charAt(j));
+        j++;
+        setTimeout(typeSpan, delay(innerText.charAt(j-1)));
+      } else {
+        i = closeIdx + closing.length; // skip past </span>
+        setTimeout(type, 60);
+      }
+    }
+    typeSpan();
+    return;
   }
-});
+
+  // normal characters
+  const ch = fullText.charAt(i++);
+  cursor.before(document.createTextNode(ch));
+  setTimeout(type, delay(ch));
+}
 
 // ===== TV STATIC (canvas) =====
 (() => {
