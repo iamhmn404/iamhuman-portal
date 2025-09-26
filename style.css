@@ -75,7 +75,22 @@ body{
   .scanlines{ animation:none !important; }
   .terminal{ animation:none !important; }
 }
-.purple {
-  color: #6A0DAD; /* white */
+.white {
+  color: #ffffff; /* plain white */
   font-weight: bold;
+}
+
+.error {
+  color: #FF3B3B; /* red error */
+  font-weight: bold;
+}
+
+.highlight {
+  color: #FFD700; /* gold highlight */
+  font-weight: bold;
+}
+
+.system {
+  color: #00FFAA; /* aqua/green system commands */
+  font-style: italic;
 }
