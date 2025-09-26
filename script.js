@@ -7,7 +7,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const pre = document.getElementById("transmission");
   if (!pre) return;
 
-  // Themed content with glitch span on "not_found"
+  // Themed content with spans for colour
   const fullText = `
 Δ-I AM // HUMAN
 
@@ -19,7 +19,7 @@ Portal initializing...
 / JUST THE WORK
 
 ∆ = proof_of_presence
-// iamhuman404:<span class="glitch" data-text="not_found">not_found</span>
+// iamhuman404:<span class="white">not_found</span>
 
 =[+] HUM // NOISE → SIGNAL
 Searching static...
@@ -43,12 +43,12 @@ Estimated contact: <span class="highlight">March 2026</span>
 
   function rand(a, b) { return Math.floor(Math.random() * (b - a + 1)) + a; }
 
-  // ⚡ Faster timings
+  // ⚡ Faster timings (≈40% quicker)
   function delay(ch) {
-    if (ch === "\n") return 180;
-    if (/[.,:;)]/.test(ch)) return 50;
-    if (/\s/.test(ch)) return 20;
-    return rand(8, 28);
+    if (ch === "\n") return 180;        // newline pause
+    if (/[.,:;)]/.test(ch)) return 50;  // punctuation pause
+    if (/\s/.test(ch)) return 20;       // spaces
+    return rand(8, 28);                 // baseline speed
   }
 
   function type() {
@@ -63,24 +63,19 @@ Estimated contact: <span class="highlight">March 2026</span>
       return;
     }
 
-    // Handle spans (<span class="..."> ... </span>)
+    // Handle <span class="..."> ... </span> typing character-by-character
     if (fullText.startsWith("<span", i)) {
       const tagEnd = fullText.indexOf(">", i) + 1;
-      const openTag = fullText.slice(i, tagEnd);
+      const openTag = fullText.slice(i, tagEnd); // e.g., <span class="error">
       const classMatch = openTag.match(/class="([^"]+)"/);
-      const dataTextMatch = openTag.match(/data-text="([^"]+)"/);
-
       const closing = "</span>";
       const closeIdx = fullText.indexOf(closing, tagEnd);
       const innerText = fullText.slice(tagEnd, closeIdx);
 
-      // Create the span
       const spanEl = document.createElement("span");
       if (classMatch) spanEl.className = classMatch[1];
-      if (dataTextMatch) spanEl.setAttribute("data-text", dataTextMatch[1]);
       cursor.before(spanEl);
 
-      // Type inside span
       let j = 0;
       (function typeSpan() {
         if (j < innerText.length) {
@@ -95,7 +90,7 @@ Estimated contact: <span class="highlight">March 2026</span>
       return;
     }
 
-    // Normal char
+    // Normal character
     const ch = fullText.charAt(i++);
     cursor.before(document.createTextNode(ch));
     setTimeout(type, delay(ch));
@@ -134,8 +129,8 @@ Estimated contact: <span class="highlight">March 2026</span>
     for (let y = 0; y < h; y += grain) {
       for (let x = 0; x < w; x += grain) {
         const color = (Math.random() < 0.5)
-          ? (0xDF000000 | greyHex)
-          : 0xDF000000;
+          ? (0xDF000000 | greyHex) // grey "white" with alpha
+          : 0xDF000000;            // black with same alpha
 
         for (let gy = 0; gy < grain; gy++) {
           for (let gx = 0; gx < grain; gx++) {
@@ -157,6 +152,7 @@ Estimated contact: <span class="highlight">March 2026</span>
     window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   if (reduce) {
+    // Render a single frame
     const white = Math.floor(255 * STATIC_BRIGHTNESS);
     const greyHex = (white << 16) | (white << 8) | white;
     const grain = Math.max(1, (STATIC_GRAINSIZE | 0));
