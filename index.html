@@ -5,21 +5,29 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>I AM HUMAN — Portal</title>
 
-  <!-- Font -->
+  <!-- Font (optional) -->
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
 
-  <!-- Stylesheet (cache-busted) -->
-  <link rel="stylesheet" href="style.css?v=4">
+  <!-- Stylesheet (cache-busted so you see changes) -->
+  <link rel="stylesheet" href="style.css?v=7">
 
   <meta name="color-scheme" content="dark">
+
+  <!-- Inline keyframes used by overlay (ensures animation works even if CSS was cached) -->
+  <style>
+    @keyframes scan { from { background-position-y: 0, 0; } to { background-position-y: 6px, 0; } }
+    @keyframes grain { 50% { transform: translate3d(-1.5%, 1.5%, 0); } 100% { transform: translate3d(0,0,0); } }
+    @keyframes softIn { from { transform: translateY(6px); filter: blur(2px); opacity: 0; } to { transform: translateY(0); filter: blur(0); opacity: 1; } }
+    @keyframes cursorBlink { 50% { opacity: 0.15; } }
+  </style>
 </head>
 <body>
   <!-- Static overlay -->
   <div class="static-overlay"></div>
 
   <!-- Terminal -->
-  <main class="terminal" aria-label="Transmission text">
+  <main class="terminal" aria-label="Transmission text" style="position:relative; z-index:3">
     <pre id="transmission">
 Δ-I AM // HUMAN
 
