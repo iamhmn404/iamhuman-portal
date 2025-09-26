@@ -1,3 +1,6 @@
+// ===== CONFIG =====
+const STATIC_BRIGHTNESS = 0.6; // 0 = black, 1 = pure white (try 0.5–0.7)
+
 // ===== TYPEWRITER =====
 document.addEventListener("DOMContentLoaded", () => {
   const pre = document.getElementById("transmission");
@@ -80,7 +83,7 @@ Estimated contact: March 2026
   }
 });
 
-// ===== TV STATIC (your existing version preserved) =====
+// ===== TV STATIC (canvas) =====
 (() => {
   const canvas = document.getElementById('snow');
   if (!canvas) return;
@@ -99,8 +102,13 @@ Estimated contact: March 2026
 
   function drawFrame() {
     const len = buf.length;
+    const white = Math.floor(255 * STATIC_BRIGHTNESS); // scaled brightness
+    const greyHex = (white << 16) | (white << 8) | white; // #RRGGBB
+
     for (let i = 0; i < len; i++) {
-      buf[i] = (Math.random() < 0.5) ? 0xDFFFFFFF : 0xDF000000;
+      buf[i] = (Math.random() < 0.5)
+        ? (0xDF000000 | greyHex) // greyish "white"
+        : 0xDF000000;            // black
     }
     ctx.putImageData(imageData, 0, 0);
     requestAnimationFrame(drawFrame);
@@ -110,10 +118,14 @@ Estimated contact: March 2026
   window.addEventListener('resize', resize);
 
   const reduce = window.matchMedia &&
-    window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   if (reduce) {
+    const white = Math.floor(255 * STATIC_BRIGHTNESS);
+    const greyHex = (white << 16) | (white << 8) | white;
     for (let i = 0; i < buf.length; i++) {
-      buf[i] = (Math.random() < 0.5) ? 0xDFFFFFFF : 0xDF000000;
+      buf[i] = (Math.random() < 0.5)
+        ? (0xDF000000 | greyHex)
+        : 0xDF000000;
     }
     ctx.putImageData(imageData, 0, 0);
   } else {
