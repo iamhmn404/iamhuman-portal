@@ -1,4 +1,4 @@
-// ==== TYPEWRITER (no flicker) ====
+// ===== TYPEWRITER =====
 document.addEventListener("DOMContentLoaded", () => {
   const pre = document.getElementById("transmission");
   if (!pre) return;
@@ -6,7 +6,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const fullText = pre.textContent;
   pre.textContent = "";
 
-  // Cursor element
   const cursor = document.createElement("span");
   cursor.className = "typing-cursor";
   cursor.setAttribute("aria-hidden", "true");
@@ -14,7 +13,7 @@ document.addEventListener("DOMContentLoaded", () => {
   pre.appendChild(cursor);
 
   let i = 0;
-  const prefersReduced = window.matchMedia &&
+  const reduce = window.matchMedia &&
     window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   function rand(a,b){ return Math.floor(Math.random()*(b-a+1))+a; }
@@ -30,55 +29,59 @@ document.addEventListener("DOMContentLoaded", () => {
     cursor.before(document.createTextNode(ch));
     setTimeout(type, delay(ch));
   }
-  if (prefersReduced){ pre.textContent = fullText; pre.appendChild(cursor); }
+  if (reduce){ pre.textContent = fullText; pre.appendChild(cursor); }
   else { type(); }
 });
 
-// ==== TRUE TV STATIC (canvas) ====
+// ===== TRUE TV STATIC (canvas) =====
 (() => {
   const canvas = document.getElementById('snow');
   if (!canvas) return;
 
   const ctx = canvas.getContext('2d', { willReadFrequently: true });
-  let w, h, imageData, buf, data;
+  let w, h, imageData, buf;
 
-  function resize(){
-    // Handle HiDPI
+  function resize() {
+    // CSS size (visual)
+    const cssW = window.innerWidth;
+    const cssH = window.innerHeight;
+    canvas.style.width  = cssW + "px";
+    canvas.style.height = cssH + "px";
+
+    // Device pixels for crispness
     const dpr = Math.max(1, window.devicePixelRatio || 1);
-    w = canvas.clientWidth = window.innerWidth;
-    h = canvas.clientHeight = window.innerHeight;
-    canvas.width  = Math.floor(w * dpr);
-    canvas.height = Math.floor(h * dpr);
+    canvas.width  = Math.floor(cssW * dpr);
+    canvas.height = Math.floor(cssH * dpr);
+
+    // Reset transform so 1 canvas unit = 1 CSS pixel
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
+    w = cssW; h = cssH;
     imageData = ctx.createImageData(w, h);
     buf = new Uint32Array(imageData.data.buffer);
-    data = imageData.data;
   }
 
-  function frame(){
-    // Fill with random black/white pixels (TV snow)
+  function drawFrame() {
     const len = buf.length;
-    for (let i = 0; i < len; i++){
-      // 0xAARRGGBB — choose white or black-ish with alpha ~220
+    for (let i = 0; i < len; i++) {
+      // random pixel: white-ish or black-ish with alpha ~225 (DF)
       buf[i] = (Math.random() < 0.5) ? 0xDFFFFFFF : 0xDF000000;
     }
     ctx.putImageData(imageData, 0, 0);
-    requestAnimationFrame(frame);
+    requestAnimationFrame(drawFrame);
   }
 
   resize();
   window.addEventListener('resize', resize);
-  // Respect reduced motion: render one frame only
+
   const reduce = window.matchMedia &&
     window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  if (reduce){
-    // one static frame
-    for (let i = 0; i < buf.length; i++){
+  if (reduce) {
+    for (let i = 0; i < buf.length; i++) {
       buf[i] = (Math.random() < 0.5) ? 0xDFFFFFFF : 0xDF000000;
     }
     ctx.putImageData(imageData, 0, 0);
   } else {
-    requestAnimationFrame(frame);
+    requestAnimationFrame(drawFrame);
   }
 })();
