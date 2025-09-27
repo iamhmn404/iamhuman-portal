@@ -1,178 +1,128 @@
-// ================== CONFIG ==================
-const STATIC_BRIGHTNESS = 0.6; // 0 = black, 1 = bright white
-const STATIC_GRAINSIZE  = 3;   // 1 = fine, 2–3 = chunkier snow
+:root {
+  --bg: #0b0d10;
+  --fg: #e9e9ea;
+}
 
-// ================= TYPEWRITER =================
-document.addEventListener("DOMContentLoaded", () => {
-  const pre = document.getElementById("transmission");
-  if (!pre) return;
+html, body {
+  height: 100%;
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: "Share Tech Mono", "Courier New", monospace;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
 
-  // Themed content with spans for colour
-  const fullText = `
-Δ-I AM // HUMAN
+/* Canvas fills background */
+#snow {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
 
-TRANSMISSION // <span class="error">UNSTABLE</span>
-Portal initializing...
+/* Terminal overlay */
+.terminal {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: left;
 
-/ NO FACE
-/ NO NAME
-/ JUST THE WORK
+  white-space: pre-wrap;
+  font-size: clamp(14px, 2.6vw, 20px);
+  line-height: 1.5;
+  max-width: 90ch;
+  padding: 1rem;
 
-∆ = proof_of_presence
-// iamhuman404:<span class="white">not_found</span>
+  background: rgba(0,0,0,.32);
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 6px;
+  box-shadow: 0 0 0 1px rgba(255,255,255,.02) inset,
+              0 10px 30px rgba(0,0,0,.35);
+  animation: softIn .5s ease-out both;
 
-=[+] HUM // NOISE → SIGNAL
-Searching static...
-Estimated contact: <span class="highlight">March 2026</span>
+  margin: auto;
+  min-height: 60vh;
+}
 
-> <span class="system">lookup</span> // not yet accessible
-> <span class="system">awaiting next transmission</span>
-  `.trim();
+@keyframes softIn {
+  from { transform: translateY(6px); filter: blur(2px); opacity: 0; }
+  to   { transform: translateY(0);   filter: blur(0);    opacity: 1; }
+}
 
-  pre.innerHTML = ""; // start clean
+/* Typing cursor */
+.typing-cursor {
+  display: inline-block;
+  width: 0.6ch;
+  margin-left: 0.1ch;
+  background: currentColor;
+  opacity: 0.9;
+  animation: cursorBlink 1.1s steps(2, jump-none) infinite;
+  transform: translateY(0.15em);
+}
 
-  const cursor = document.createElement("span");
-  cursor.className = "typing-cursor";
-  cursor.setAttribute("aria-hidden", "true");
-  cursor.textContent = " ";
-  pre.appendChild(cursor);
+@keyframes cursorBlink {
+  50% { opacity: 0.15; }
+}
 
-  let i = 0;
-  const prefersReduced = window.matchMedia &&
-    window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+/* Colour classes */
+.white {
+  color: #ffffff;
+  font-weight: bold;
+}
 
-  function rand(a, b) { return Math.floor(Math.random() * (b - a + 1)) + a; }
+.error {
+  color: #FF3B3B;
+  font-weight: bold;
+}
 
-  // ⚡ Faster timings (≈40% quicker)
-  function delay(ch) {
-    if (ch === "\n") return 180;        // newline pause
-    if (/[.,:;)]/.test(ch)) return 50;  // punctuation pause
-    if (/\s/.test(ch)) return 20;       // spaces
-    return rand(8, 28);                 // baseline speed
-  }
+.highlight {
+  color: #FFD700;
+  font-weight: bold;
+}
 
-  function type() {
-    if (i >= fullText.length) return;
+.system {
+  color: #00FFAA;
+  font-style: italic;
+}
 
-    // Pause after "404:"
-    const slice = fullText.slice(i, i + 4);
-    if (slice === "404:") {
-      cursor.before(document.createTextNode("404:"));
-      i += 4;
-      setTimeout(type, 2000); // 2s pause
-      return;
-    }
+/* Accessibility */
+@media (prefers-reduced-motion: reduce) {
+  #snow { display: none; }
+  .terminal { animation: none !important; }
+}
 
-    // Handle <span class="..."> ... </span> typing character-by-character
-    if (fullText.startsWith("<span", i)) {
-      const tagEnd = fullText.indexOf(">", i) + 1;
-      const openTag = fullText.slice(i, tagEnd); // e.g., <span class="error">
-      const classMatch = openTag.match(/class="([^"]+)"/);
-      const closing = "</span>";
-      const closeIdx = fullText.indexOf(closing, tagEnd);
-      const innerText = fullText.slice(tagEnd, closeIdx);
-
-      const spanEl = document.createElement("span");
-      if (classMatch) spanEl.className = classMatch[1];
-      cursor.before(spanEl);
-
-      let j = 0;
-      (function typeSpan() {
-        if (j < innerText.length) {
-          const ch = innerText.charAt(j++);
-          spanEl.append(ch);
-          setTimeout(typeSpan, delay(ch));
-        } else {
-          i = closeIdx + closing.length; // move past </span>
-          setTimeout(type, 50);
-        }
-      })();
-      return;
-    }
-
-    // Normal character
-    const ch = fullText.charAt(i++);
-    cursor.before(document.createTextNode(ch));
-    setTimeout(type, delay(ch));
-  }
-
-  if (prefersReduced) {
-    pre.innerHTML = fullText;
-    pre.appendChild(cursor);
-  } else {
-    type();
-  }
-});
-
-// ============== TV STATIC (canvas) ==============
-(() => {
-  const canvas = document.getElementById("snow");
-  if (!canvas) return;
-
-  const ctx = canvas.getContext("2d", { willReadFrequently: true });
-  let w, h, imageData, buf;
-
-  function resize() {
-    w = window.innerWidth;
-    h = window.innerHeight;
-    canvas.width = w;
-    canvas.height = h;
-    imageData = ctx.createImageData(w, h);
-    buf = new Uint32Array(imageData.data.buffer);
-  }
-
-  function drawFrame() {
-    const white = Math.floor(255 * STATIC_BRIGHTNESS);
-    const greyHex = (white << 16) | (white << 8) | white;
-    const grain = Math.max(1, (STATIC_GRAINSIZE | 0));
-
-    for (let y = 0; y < h; y += grain) {
-      for (let x = 0; x < w; x += grain) {
-        const color = (Math.random() < 0.5)
-          ? (0xDF000000 | greyHex) // grey "white" with alpha
-          : 0xDF000000;            // black with same alpha
-
-        for (let gy = 0; gy < grain; gy++) {
-          for (let gx = 0; gx < grain; gx++) {
-            const px = (y + gy) * w + (x + gx);
-            if (px < buf.length) buf[px] = color;
-          }
-        }
-      }
-    }
-
-    ctx.putImageData(imageData, 0, 0);
-    requestAnimationFrame(drawFrame);
-  }
-
-  resize();
-  window.addEventListener("resize", resize);
-
-  const reduce = window.matchMedia &&
-    window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-
-  if (reduce) {
-    // Render a single frame
-    const white = Math.floor(255 * STATIC_BRIGHTNESS);
-    const greyHex = (white << 16) | (white << 8) | white;
-    const grain = Math.max(1, (STATIC_GRAINSIZE | 0));
-
-    for (let y = 0; y < h; y += grain) {
-      for (let x = 0; x < w; x += grain) {
-        const color = (Math.random() < 0.5)
-          ? (0xDF000000 | greyHex)
-          : 0xDF000000;
-
-        for (let gy = 0; gy < grain; gy++) {
-          for (let gx = 0; gx < grain; gx++) {
-            const px = (y + gy) * w + (x + gx);
-            if (px < buf.length) buf[px] = color;
-          }
-        }
-      }
-    }
-    ctx.putImageData(imageData, 0, 0);
-  } else {
-    requestAnimationFrame(drawFrame);
-  }
-})();
+/* ===== GLITCH EFFECT ===== */
+.glitch {
+  position: relative;
+  display: inline-block;
+  color: #fff;
+}
+.glitch::before,
+.glitch::after {
+  content: attr(data-text);
+  position: absolute;
+  left: 0;
+  width: 100%;
+  overflow: hidden;
+  clip: rect(0, 900px, 0, 0);
+}
+.glitch::before {
+  animation: glitch-top 2s infinite linear alternate-reverse;
+  color: #f0f;
+}
+.glitch::after {
+  animation: glitch-bottom 1.5s infinite linear alternate-reverse;
+  color: #0ff;
+}
+@keyframes glitch-top {
+  10% { clip: rect(10px, 9999px, 50px, 0); transform: translate(-2px,-2px);}
+  20% { clip: rect(85px, 9999px, 140px, 0); transform: translate(2px,2px);}
+}
+@keyframes glitch-bottom {
+  10% { clip: rect(140px, 9999px, 190px, 0); transform: translate(2px,0);}
+  20% { clip: rect(50px, 9999px, 80px, 0); transform: translate(-2px,0);}
+}
