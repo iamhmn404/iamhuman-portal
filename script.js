@@ -13,12 +13,11 @@ document.addEventListener("DOMContentLoaded", () => {
 TRANSMISSION // <span class="error">UNSTABLE</span>
 Portal initializing...
 
+// ∆-iamhuman404:<span class="glitch" data-text="not_found">not_found</span>
+
 / NO FACE
 / NO NAME
 / JUST THE WORK
-
-∆ = proof_of_presence
-// iamhuman404:<span class="glitch" data-text="not_found">not_found</span>
 
 =[+] HUM // NOISE → SIGNAL
 Searching static...
